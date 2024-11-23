@@ -1,0 +1,9 @@
+# rust
+target/
+
+# env
+.env
+
+# dotenv
+.env.local
+Cargo.lock
