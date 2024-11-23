@@ -2,7 +2,9 @@ mod error;
 mod handlers;
 mod models;
 mod repository;
+mod logger;
 
+use log::info;
 use axum::{
     routing::{get, post, delete, put},
     Router,
@@ -30,9 +32,13 @@ async fn create_db_client() -> Database {
 
 #[tokio::main]
 async fn main() {
+    logger::init_logger();
     dotenv().ok();
+    info!("Environment variables loaded");
     
     let db = create_db_client().await;
+    info!("Database connection established");
+    
     let project_repository = ProjectRepository::new(db);
 
     let cors = CorsLayer::permissive();
@@ -47,6 +53,6 @@ async fn main() {
         .layer(cors);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    println!("Server running on {}", listener.local_addr().unwrap());
+    info!("Server running on {}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap();
 }
