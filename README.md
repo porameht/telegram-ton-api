@@ -3,7 +3,6 @@
 A robust REST API service built with Rust, providing account and project management functionality for Telegram TON blockchain integration.
 
 ## Features
-@
 - **Account Management**
   - Create, read, update, and delete accounts
   - Email and wallet address validation
