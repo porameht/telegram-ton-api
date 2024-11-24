@@ -3,6 +3,7 @@ mod handlers;
 mod models;
 mod repository;
 mod logger;
+mod service;
 
 use log::info;
 use axum::{
@@ -22,6 +23,8 @@ use crate::handlers::account_handler::{
 };
 use crate::repository::project_repository::ProjectRepository;
 use crate::repository::account_repository::AccountRepository;
+use crate::service::project_service::ProjectService;
+use crate::service::account_service::AccountService;
 
 async fn create_db_client() -> Database {
     let mongodb_uri = env::var("MONGODB_URL").expect("MONGODB_URL must be set");
@@ -44,7 +47,10 @@ async fn main() {
     info!("Database connection established");
     
     let project_repository = ProjectRepository::new(db.clone());
+    let project_service = ProjectService::new(project_repository);
+    
     let account_repository = AccountRepository::new(db.clone());
+    let account_service = AccountService::new(account_repository);
 
     let cors = CorsLayer::permissive();
 
@@ -54,7 +60,7 @@ async fn main() {
         .route("/projects/:id", get(get_project))
         .route("/projects/:id", put(update_project))
         .route("/projects/:id", delete(delete_project))
-        .with_state(project_repository);
+        .with_state(project_service);
 
     let account_routes = Router::new()
         .route("/accounts", post(create_account))
@@ -62,7 +68,7 @@ async fn main() {
         .route("/accounts/:id", get(get_account))
         .route("/accounts/:id", put(update_account))
         .route("/accounts/:id", delete(delete_account))
-        .with_state(account_repository);
+        .with_state(account_service);
 
     let app = project_routes
         .merge(account_routes)

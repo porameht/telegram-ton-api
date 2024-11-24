@@ -4,59 +4,54 @@ use axum::{
 };
 use mongodb::bson::oid::ObjectId;
 
-use crate::{models::project::Project, repository::project_repository::ProjectRepository, error::ApiError};
+use crate::{
+    models::project::Project, 
+    service::project_service::ProjectService,
+    error::ApiError
+};
 
 pub async fn create_project(
-    State(repo): State<ProjectRepository>,
-    Json(mut project): Json<Project>,
+    State(service): State<ProjectService>,
+    Json(project): Json<Project>,
 ) -> Result<Json<Project>, ApiError> {
-    project.created_at = chrono::Utc::now();
-    project.updated_at = chrono::Utc::now();
-    let project = repo.create(project).await?;
+    let project = service.create_project(project).await?;
     Ok(Json(project))
 }
 
 pub async fn update_project(
-    State(repo): State<ProjectRepository>,
+    State(service): State<ProjectService>,
     Path(id): Path<String>,
-    Json(mut project): Json<Project>,
+    Json(project): Json<Project>,
 ) -> Result<Json<Project>, ApiError> {
     let object_id = ObjectId::parse_str(&id)
         .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
-    project.updated_at = chrono::Utc::now();
-    let project = repo.update(&object_id, project).await?;
+    let project = service.update_project(&object_id, project).await?;
     Ok(Json(project))
 }
 
 pub async fn delete_project(
-    State(repo): State<ProjectRepository>,
+    State(service): State<ProjectService>,
     Path(id): Path<String>,
 ) -> Result<Json<bool>, ApiError> {
     let object_id = ObjectId::parse_str(&id)
         .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
-    let result = repo.delete(&object_id).await?;
+    let result = service.delete_project(&object_id).await?;
     Ok(Json(result))
 }
 
 pub async fn get_project(
-    State(repo): State<ProjectRepository>,
+    State(service): State<ProjectService>,
     Path(id): Path<String>,
 ) -> Result<Json<Project>, ApiError> {
     let object_id = ObjectId::parse_str(&id)
         .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
-
-    println!("Getting project with ID: {}", id);
-    let project = repo.get_by_id(&object_id).await?;
-
-    println!("Project: {:?}", project);
+    let project = service.get_project(&object_id).await?;
     Ok(Json(project))
 }
 
 pub async fn get_all_projects(
-    State(repo): State<ProjectRepository>,
+    State(service): State<ProjectService>,
 ) -> Result<Json<Vec<Project>>, ApiError> {
-    println!("Getting all projects");
-    let projects = repo.get_all().await?;
-    println!("Projects: {:?}", projects);
+    let projects = service.get_all_projects().await?;
     Ok(Json(projects))
 } 

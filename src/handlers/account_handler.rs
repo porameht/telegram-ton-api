@@ -4,56 +4,54 @@ use axum::{
 };
 use mongodb::bson::oid::ObjectId;
 
-use crate::{models::account::Account, repository::account_repository::AccountRepository, error::ApiError};
+use crate::{
+    models::account::Account,
+    service::account_service::AccountService,
+    error::ApiError,
+};
 
 pub async fn create_account(
-    State(repo): State<AccountRepository>,
-    Json(mut account): Json<Account>,
+    State(service): State<AccountService>,
+    Json(account): Json<Account>,
 ) -> Result<Json<Account>, ApiError> {
-    account.created_at = chrono::Utc::now();
-    account.updated_at = chrono::Utc::now();
-    let account = repo.create(account).await?;
+    let account = service.create_account(account).await?;
     Ok(Json(account))
 }
 
 pub async fn update_account(
-    State(repo): State<AccountRepository>,
+    State(service): State<AccountService>,
     Path(id): Path<String>,
-    Json(mut account): Json<Account>,
+    Json(account): Json<Account>,
 ) -> Result<Json<Account>, ApiError> {
     let object_id = ObjectId::parse_str(&id)
         .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
-    account.updated_at = chrono::Utc::now();
-    let account = repo.update(&object_id, account).await?;
+    let account = service.update_account(&object_id, account).await?;
     Ok(Json(account))
 }
 
 pub async fn delete_account(
-    State(repo): State<AccountRepository>,
+    State(service): State<AccountService>,
     Path(id): Path<String>,
 ) -> Result<Json<bool>, ApiError> {
     let object_id = ObjectId::parse_str(&id)
         .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
-    let result = repo.delete(&object_id).await?;
+    let result = service.delete_account(&object_id).await?;
     Ok(Json(result))
 }
 
 pub async fn get_account(
-    State(repo): State<AccountRepository>,
+    State(service): State<AccountService>,
     Path(id): Path<String>,
 ) -> Result<Json<Account>, ApiError> {
     let object_id = ObjectId::parse_str(&id)
         .map_err(|_| ApiError::BadRequest("Invalid ID format".to_string()))?;
-
-    let account = repo.get_by_id(&object_id).await?;
+    let account = service.get_account(&object_id).await?;
     Ok(Json(account))
 }
 
 pub async fn get_all_accounts(
-    State(repo): State<AccountRepository>,
+    State(service): State<AccountService>,
 ) -> Result<Json<Vec<Account>>, ApiError> {
-    println!("Getting all accounts");
-    let accounts = repo.get_all().await?;
-    println!("Accounts: {:?}", accounts);
+    let accounts = service.get_all_accounts().await?;
     Ok(Json(accounts))
 }
