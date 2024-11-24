@@ -4,9 +4,25 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Watermark {
+    // Add watermark fields as needed - you'll need to specify the exact structure
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FacebookCredential {
+    pub app_id: String,
+    pub app_secret: String,
     pub access_token: String,
-    pub page_id: String,
+    pub ad_account_id: String,
+    pub account_suffix: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pixel_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub link_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub watermark: Option<Watermark>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
