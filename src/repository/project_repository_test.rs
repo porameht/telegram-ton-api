@@ -30,8 +30,15 @@ fn create_test_project() -> Project {
     facebook_credentials.insert(
         "test_page".to_string(),
         FacebookCredential {
+            app_id: "test_app_id".to_string(),
+            app_secret: "test_app_secret".to_string(),
             access_token: "test_token".to_string(),
-            page_id: "test_page_id".to_string(),
+            ad_account_id: "test_ad_account_id".to_string(),
+            account_suffix: "test_suffix".to_string(),
+            pixel_id: None,
+            link_url: None,
+            page_id: Some("test_page_id".to_string()),
+            watermark: None,
         },
     );
 
