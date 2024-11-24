@@ -13,16 +13,18 @@ use crate::{
 };
 
 async fn setup_test_db() -> Database {
-    // Load environment variables from .env file
     dotenv().ok();
     
-    let mongodb_uri = std::env::var("MONGODB_URL").expect("MONGODB_URL must be set");
+    let mongodb_uri = std::env::var("MONGODB_URL")
+        .unwrap_or_else(|_| "mongodb://localhost:27017".to_string());
+    let database_name = std::env::var("DATABASE_NAME")
+        .unwrap_or_else(|_| "test_database".to_string());
+    
     let client = Client::with_uri_str(&mongodb_uri)
         .await
         .expect("Failed to create MongoDB client");
     
-    // Use a test database to avoid conflicts with production
-    client.database("test_database")
+    client.database(&database_name)
 }
 
 fn create_test_project() -> Project {

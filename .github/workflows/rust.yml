@@ -8,15 +8,35 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  MONGODB_URL: mongodb://localhost:27017
+  DATABASE_NAME: test_db
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    
     - name: Build
       run: cargo build --verbose
+      
     - name: Run tests
       run: cargo test --verbose
+      env:
+        RUST_BACKTRACE: 1
+        MONGODB_URL: mongodb://localhost:27017
+        DATABASE_NAME: test_db
