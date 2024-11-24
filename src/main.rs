@@ -17,7 +17,11 @@ use tower_http::cors::CorsLayer;
 use crate::handlers::project_handler::{
     create_project, delete_project, get_all_projects, get_project, update_project,
 };
+use crate::handlers::account_handler::{
+    create_account, delete_account, get_all_accounts, get_account, update_account,
+};
 use crate::repository::project_repository::ProjectRepository;
+use crate::repository::account_repository::AccountRepository;
 
 async fn create_db_client() -> Database {
     let mongodb_uri = env::var("MONGODB_URL").expect("MONGODB_URL must be set");
@@ -39,17 +43,29 @@ async fn main() {
     let db = create_db_client().await;
     info!("Database connection established");
     
-    let project_repository = ProjectRepository::new(db);
+    let project_repository = ProjectRepository::new(db.clone());
+    let account_repository = AccountRepository::new(db.clone());
 
     let cors = CorsLayer::permissive();
 
-    let app = Router::new()
+    let project_routes = Router::new()
         .route("/projects", post(create_project))
         .route("/projects", get(get_all_projects))
         .route("/projects/:id", get(get_project))
         .route("/projects/:id", put(update_project))
         .route("/projects/:id", delete(delete_project))
-        .with_state(project_repository)
+        .with_state(project_repository);
+
+    let account_routes = Router::new()
+        .route("/accounts", post(create_account))
+        .route("/accounts", get(get_all_accounts))
+        .route("/accounts/:id", get(get_account))
+        .route("/accounts/:id", put(update_account))
+        .route("/accounts/:id", delete(delete_account))
+        .with_state(account_repository);
+
+    let app = project_routes
+        .merge(account_routes)
         .layer(cors);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
