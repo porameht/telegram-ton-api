@@ -83,7 +83,7 @@ The server will start on `http://localhost:3000`
 - `DELETE /projects/:id` - Delete a project
 
 ## Project Structure
-
+```
 src/
 ├── main.rs # Application entry point
 ├── error/ # Error handling
@@ -92,6 +92,7 @@ src/
 ├── repository/ # Database operations
 ├── service/ # Business logic
 └── logger/ # Logging configuration
+```
 
 ## Testing
 
